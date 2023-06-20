@@ -1,2 +1,4 @@
 # dam-2023
-GUT Data Analytics Meeting 2023 workshop materials
+
+Gdańsk University of Technology Data Analytics Meeting 2023 workshop materials - "Data mining project lifecycle".
+
