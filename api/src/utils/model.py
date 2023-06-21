@@ -4,6 +4,7 @@ from typing import Any
 import joblib
 import pandas as pd
 
+from ..exceptions import ModelNotFound
 from ..utils.logger import get_logger
 from ..config import settings
 
@@ -22,9 +23,13 @@ class Model:
 
     def _load_model(self) -> Any:
         log.info(f"Loading model '{self.model_path}'")
-        model = joblib.load(Path(self.model_path))
-        log.info(f"Model loaded sucessfully: {model}")
-        return model
+        try:
+            model = joblib.load(Path(self.model_path))
+            log.info(f"Model loaded sucessfully: {model}")
+            return model
+        except FileNotFoundError as e:
+            log.error(f"Failed to locate model file: '{self.model_path}'")
+            raise ModelNotFound("Failed to locate model file")
 
     def predict(self, X: pd.DataFrame):
         return self.model.predict(X)
