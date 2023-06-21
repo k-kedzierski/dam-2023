@@ -1,10 +1,10 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 import pandas as pd
 import time
 from scipy import stats
 
 from ..utils.logger import get_logger
-from ..utils.model import Model
+from ..utils.model import Model, get_model
 from ..config import settings
 
 from ..schemas import PredictionIntervalRequest, PredictRequest
@@ -15,11 +15,10 @@ router = APIRouter()
 
 
 @router.post("/housing/predict")
-async def predict(request: PredictRequest):
+async def predict(request: PredictRequest, model: Model = Depends(get_model)):
     log.info("Running prediction...")
 
     start_time = time.perf_counter()
-    model = Model(model_path="../models/best_model.pkl")
     X = pd.DataFrame([request.data.dict()])
     y_pred = model.predict(X).flat[0]
 
@@ -28,12 +27,14 @@ async def predict(request: PredictRequest):
     log.info(f"Finished predicting: {y_pred=} in {elapsed_time} seconds.")
     return {"response": y_pred, "time": elapsed_time}
 
+
 @router.post("/housing/prediction_interval")
-async def prediction_interval(request: PredictionIntervalRequest):
+async def prediction_interval(
+    request: PredictionIntervalRequest, model: Model = Depends(get_model)
+):
     log.info("Calculating prediction intervals...")
 
     start_time = time.perf_counter()
-    model = Model(model_path=settings.MODEL_PATH)
     X = pd.DataFrame([request.data.dict()])
     y_pred = model.predict(X).flat[0]
 
@@ -43,5 +44,7 @@ async def prediction_interval(request: PredictionIntervalRequest):
 
     elapsed_time = round(time.perf_counter() - start_time, 3)
 
-    log.info(f"Finished calculating prediction intervals: ({lower_bound} ,{upper_bound}) in {elapsed_time} seconds.")
+    log.info(
+        f"Finished calculating prediction intervals: ({lower_bound} ,{upper_bound}) in {elapsed_time} seconds."
+    )
     return {"response": (y_pred - interval, y_pred + interval), "time": elapsed_time}
