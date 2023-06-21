@@ -1,13 +1,28 @@
 from fastapi import APIRouter
+import pandas as pd
+from scipy import stats
 
-from ..schemas import ConfidenceIntervalRequest, PredictRequest
+from ..utils.model import Model
+
+from ..schemas import PredictionIntervalRequest, PredictRequest
 
 router = APIRouter()
 
 @router.post("/housing/predict")
 async def predict(request: PredictRequest):
-    return {"response": "foo"}
+    model = Model(model_path="../models/best_model.pkl")
+    X = pd.DataFrame([request.data.dict()])
+    y_pred = model.predict(X).flat[0]
+    return {"response": y_pred}
 
-@router.post("/housing/confidence_interval")
-async def confidence_interval(request: ConfidenceIntervalRequest):
-    return {"response": "bar"}
+@router.post("/housing/prediction_interval")
+async def prediction_interval(request: PredictionIntervalRequest):
+    model = Model(model_path="../models/best_model.pkl")
+    estimated_stdev = 50581.26
+
+    X = pd.DataFrame([request.data.dict()])
+    y_pred = model.predict(X).flat[0]
+
+    interval = stats.norm.ppf((1 + (1 - request.alpha)) / 2) * estimated_stdev
+
+    return {"response": (y_pred - interval, y_pred + interval)}

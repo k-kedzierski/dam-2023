@@ -13,6 +13,7 @@ seaborn = "^0.12.2"
 scikit-learn = "^1.2.2"
 plotly = "^5.15.0"
 fastapi = {extras = ["all"], version = "^0.97.0"}
+cloudpickle = "^2.2.1"
 
 
 [build-system]

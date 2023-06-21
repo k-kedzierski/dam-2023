@@ -1,22 +1,23 @@
 from pydantic import BaseModel, validator
+from typing import Optional
 
 class FeaturesModel(BaseModel):
-    longitude: float
-    latitude: float
-    housing_median_age: float
-    total_rooms: int
-    total_bedrooms: int
-    population: float
-    households: int
-    median_income: float
-    ocean_proximity: str
+    longitude: Optional[float]
+    latitude: Optional[float]
+    housing_median_age: Optional[float]
+    total_rooms: Optional[int]
+    total_bedrooms: Optional[int]
+    population: Optional[float]
+    households: Optional[int]
+    median_income: Optional[float]
+    ocean_proximity: Optional[str]
 
 class PredictRequest(BaseModel):
     data: FeaturesModel
 
-class ConfidenceIntervalRequest(BaseModel):
+class PredictionIntervalRequest(BaseModel):
     data: FeaturesModel
-    alpha: float
+    alpha: float = 0.05
 
     @validator("alpha")
     def alpha_between_zero_one(cls, v):
